@@ -1,0 +1,58 @@
+---
+# - name: test how easy_install, pip, and yum modules works via proxy
+#   hosts: hadoop-master
+#   tasks:
+#   - name: Install easy_install
+#     yum:
+#       name: python-setuptools
+
+
+- name: Install tasks by banani
+  hosts: hadoop-master
+  remote_user: hadoop
+  sudo: yes
+
+  roles:
+    - base
+  vars:
+    apt_cache_time: 3600
+    venv: ~/venv/bin/activate     # Path to virtualenv
+    venv_packages: [python]        # List of packages required to create the virtualenv
+    venv_python: python            # Version of python to create the virtualenv with
+    venv_requirements: (undefined)  # If given, the virtualenv will have these packages installed
+    # Ownership settings
+    venv_owner: (undefined)
+    venv_group: (undefined)
+
+
+
+- name: Install tasks by banani
+  hosts: hadoop-master
+  remote_user: hadoop
+  sudo: yes
+
+  roles:
+    - common
+    - oraclejava8
+
+
+  # - role: sujaymansingh2.virtualenv
+
+
+ #    - common
+ # #   - spark
+ #    - oraclejava8
+ #    - master
+
+
+# - name: Install tasks by banani for data nodes
+#   hosts: hadoop-data
+#   remote_user: hadoop
+#   # sudo: yes
+#
+#   roles:
+#     - base
+    # - common
+ #   - spark
+    # - oraclejava8
+    # - master

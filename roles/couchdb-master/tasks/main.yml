@@ -1,0 +1,6 @@
+---
+- name: Install couchdb
+  apt: pkg={{item}} state=latest
+  sudo: yes
+  with_items:
+    - couchdb

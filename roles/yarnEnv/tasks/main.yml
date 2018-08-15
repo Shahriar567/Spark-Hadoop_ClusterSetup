@@ -1,0 +1,6 @@
+---
+- name: Ansible copy file force
+  copy:
+    src: yarn-site.xml
+    dest: /home/vagrant/src
+    force: yes

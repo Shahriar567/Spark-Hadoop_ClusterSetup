@@ -1,0 +1,152 @@
+---
+- name: Install developer and compile tools
+  apt: pkg={{ item }} state=present
+  sudo: yes
+  with_items:
+  - build-essential
+  - cmake
+  - git
+  - pkg-config
+
+
+- name: Install apt packages for OpenCV
+  apt: pkg={{ item }} state=present update_cache=yes cache_valid_time=3600
+  with_items:
+    - checkinstall
+    - cmake
+    - libgtk2.0-dev
+    - libjasper-dev
+    - libjpeg-dev
+    - liblapacke-dev
+    - libopencv-dev
+    - libqt4-dev
+    - libswscale-dev
+    - libtiff-dev
+    - ocl-icd-opencl-dev
+    - pkg-config
+    - python-dev
+    - python-numpy
+    - python-scipy
+    - python-paramiko
+    - unzip
+    - yasm
+    - libavcodec-dev
+    - libavformat-dev
+    - libswscale-dev
+    - libv4l-dev
+    - libatlas-base-dev
+    - gfortran
+  become: yes
+
+- name: Check if OpenCV is installed
+  stat: path=/usr/local/include/opencv
+  become: yes
+  register: opencv_package
+
+- name: Set opencv package exists fact
+  set_fact: opencv_package_exists={{ opencv_package.stat.exists }}
+
+- name: Set opencv_contrib package exists fact
+  set_fact: opencv_package_exists={{ opencv_package.stat.exists }}
+
+
+- name: Creates directory for opencv_contrib
+  file: path=/opt/opencv_contrib state=directory
+
+- name: Ensure opencv directory is there
+  file: >
+    path={{ opencv_dir }}
+    state=directory
+    mode=0777
+  become: yes
+  # when: not opencv_package_exists
+
+- name: Check if OpenCV source is there
+  stat: path={{ opencv_dir }}/source.zip
+  register: opencv_source
+  # when: not opencv_package_exists
+
+
+- name: Download OpenCV source
+  get_url:
+    url=https://github.com/opencv/opencv/archive/3.0.0.zip
+    dest={{ opencv_dir }}/source.zip
+  # when: not opencv_package_exists
+
+- name: Unzip OpenCV source
+  unarchive: >
+    src={{ opencv_dir }}/source.zip
+    dest={{ init_dir }}/
+    copy=no
+  # when: not opencv_package_exists
+
+
+
+- name: Move directory contents
+  command: cp -r /opt/opencv-3.0.0/. /opt/opencv
+
+- name: Download opencv_contrib source
+  get_url:
+    url=https://github.com/opencv/opencv_contrib/archive/3.0.0.zip
+    dest={{ opencv_contrib_dir }}/source.zip
+  # when: not opencv_package_exists
+
+- name: Unzip OpenCV source
+  unarchive: >
+    src={{ opencv_contrib_dir }}/source.zip
+    dest={{ opencv_contrib_dir }}
+    copy=no
+  # when: not opencv_package_exists
+
+
+- name: Ensure opencv release directory is there
+  file: >
+    path={{ opencv_source_dir }}/release
+    state=directory
+  # when: not opencv_package_exists
+
+- name: Creates directory for build
+  file: path=/opt/opencv/build state=directory
+
+# - name: Cmake OpenCV
+#   command: cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D INSTALL_C_EXAMPLES=ON -D INSTALL_PYTHON_EXAMPLES=ON -D BUILD_NEW_PYTHON_SUPPORT=ON -D WITH_FFMPEG=OFF -D WITH_QT=ON -D OPENCV_EXTRA_MODULES_PATH={{ opencv_contrib_dir }}/modules -D WITH_OPENGL=ON {{ opencv_extra_cmake_options }}..
+#   #command: cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_FFMPEG=OFF
+#   # command: cmake -D WITH_TBB=ON -D INSTALL_C_EXAMPLES=ON -D WITH_EIGEN=OFF -D BUILD_EXAMPLES=ON -D WITH_QT=ON -D WITH_OPENGL=ON -D OPENCV_EXTRA_MODULES_PATH= {{ opencv_contrib_dir }}/modules  ..
+#   args:
+#     chdir: /opt/opencv/build
+#   async: 45
+#   poll: 5
+#   # when: not opencv_package_exists
+#
+#
+# - name: Make OpenCV
+#   shell: make --jobs $(( $(nproc) - 1 ))
+#   args:
+#     chdir: '{{ build_dir }}'
+#   async: 45
+#   poll: 5
+#   # when: not opencv_package_exists
+#
+# - name: Make install OpenCV
+#   command: make install
+#   args:
+#     chdir: '{{ build_dir }}'
+#   become: yes
+#   # when: not opencv_package_exists
+#
+# - name: ldconfig OpenCV
+#   command: ldconfig
+#   args:
+#     chdir: '{{ build_dir }}'
+#   become: yes
+#   # when: not opencv_package_exists
+
+- name: Ensure env vars are set
+  lineinfile: >
+    dest=/etc/bash.bashrc
+    state=present
+    line={{ item }}
+  with_items:
+    - 'PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig'
+    - 'export PKG_CONFIG_PATH'
+  become: yes

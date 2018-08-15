@@ -1,0 +1,7 @@
+init_dir: /opt/
+opencv_dir: /opt/opencv
+opencv_contrib_dir : /opt/opencv_contrib
+build_dir : /opt/opencv/build
+opencv_source_dir: '{{ opencv_dir }}/opencv-{{ opencv_commit }}'
+opencv_commit:
+opencv_extra_cmake_options: ''

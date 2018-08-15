@@ -1,0 +1,101 @@
+---
+- name: Install virtualenv package
+  apt:
+    name: python-virtualenv
+    state: present
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_time }}"
+
+- name: Install packages required to create virtualenv
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_time }}"
+  with_items: "{{ venv_packages }}"
+
+- name: Create virtualenv
+  command: virtualenv --python={{ venv_python }} {{ venv }}
+  args:
+    creates: "{{ venv }}"
+
+- name: Create venv owner
+  user:
+    name: "{{ venv_owner }}"
+    createhome: false
+  when: venv_owner is defined and venv_owner
+
+- name: Create venv group
+  group:
+    name: "{{ venv_group }}"
+  when: venv_group is defined and venv_group
+
+- name: Set ownership of virtualenv directory
+  file:
+    path: "{{ venv }}"
+    state: directory
+    owner: "{{ venv_owner | default(omit) }}"
+    group: "{{ venv_group | default(omit) }}"
+    recurse: yes
+
+
+
+# The roles to install apache-beam
+
+- name: Install Python/PIP Packages
+  apt: pkg={{item}} state=latest
+  sudo: yes
+  with_items:
+    - yum
+    - python
+    - python-dev
+    - python-pip
+    - python-virtualenv
+    - python-setuptools
+    - build-essential
+
+- name: Install Python/PIP Packages
+  apt: pkg={{item}} state=removed
+  sudo: yes
+  with_items:
+    - python-yaml
+
+
+
+
+
+- name: Install pip packages.
+  sudo: yes
+  pip: name={{ item }} virtualenv={{ venv }}
+  with_items:
+      - markdown
+      - virtualenv
+      # - 'requests[security]'
+      - setuptools
+
+
+
+- name: Upgrade pip
+  pip: name=pip state=latest virtualenv={{ venv }}
+  tags:
+    - packages
+
+
+- name: Install numpy
+  sudo: yes
+  pip: name={{ item }} virtualenv={{ venv }}
+  with_items:
+      - numpy
+
+# - name: Install apache-beam
+#   pip: name={{ item }} virtualenv={{ venv }}
+#   extra_args: --upgrade --ignore-installed six
+#   with_items:
+#     - apache-beam
+#     - apache-beam[gcd]
+#     - apache-beam[test]
+#     - apache-beam[docs]
+
+
+
+# --upgrade --ignore-installed six

@@ -1,0 +1,14 @@
+[hadoop-master]
+206.12.103.124            ansible_connection=ssh  ansible_ssh_user=hadoop api_hostname=master  ansible_ssh_private_key_file=~/.ssh/vcm.pem
+
+[hadoop-data]
+206.12.103.123            ansible_connection=ssh  ansible_ssh_user=debian api_hostname=hadoop-data-3  ansible_ssh_private_key_file=~/.ssh/vcm.pem
+
+[hadoop-master:vars]
+nodesfile=nodes-pro
+
+[hadoop-data:vars]
+nodesfile=nodes-pro
+
+[all:vars]
+master=206.12.103.124

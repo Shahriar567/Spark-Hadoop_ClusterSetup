@@ -1,0 +1,4 @@
+---
+hadoop_user: hadoop
+hadoop_group: hadoop
+hadoop_download_url: http://httpd-mirror.sergal.org/apache/hadoop/common/hadoop-3.1.1/hadoop-3.1.1.tar.gz
